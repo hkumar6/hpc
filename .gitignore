@@ -1,0 +1,4 @@
+opencl_add/*.swp
+*.bc
+*.o
+*.out
