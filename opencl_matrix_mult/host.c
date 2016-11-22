@@ -11,7 +11,7 @@
 #define MAXPATHLEN  512
 
 // The number of double4s we will pass to our test kernel execution.
-#define NELEMENTS   4
+#define NELEMENTS   1024
 
 // The various OpenCL objects needed to execute our CL program against a
 // given compute device in our system.
@@ -20,6 +20,7 @@ cl_device_type   device_type;
 cl_device_id     device;
 cl_context       context;
 cl_command_queue queue;
+cl_event         event;
 cl_program       program;
 cl_kernel        kernel;
 cl_mem           a, b, c;
@@ -114,8 +115,7 @@ static void create_program_from_bitcode(char* bitcode_path) {
   // by passing 'NULL' as the 6th parameter.
   
   size_t global[] = {NELEMENTS, NELEMENTS};
-  err = clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global, NULL, 0, NULL, 
-    NULL);
+  err = clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global, NULL, 0, NULL, &event);
   check_status("clEnqueueNDRangeKernel", err);
   
   // Read back the results (blocking, so everything finishes), and then 
@@ -124,6 +124,16 @@ static void create_program_from_bitcode(char* bitcode_path) {
   clEnqueueReadBuffer(queue, c, CL_TRUE, 0, NELEMENTS*NELEMENTS*sizeof(cl_double), host_c, 
     0, NULL, NULL);
   
+  // Get profiling data for computations
+  clWaitForEvents(1, &event);
+  clFinish(queue);
+  cl_ulong time_start, time_end;
+  double total_time;
+  clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+  clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+  total_time = time_end-time_start;
+  fprintf(stdout, "OpenCL execution time: %f ns\n", total_time);
+
   int j, k, success = 1;
   double temp;
   for (i = 0; i < NELEMENTS; i++) {
@@ -177,9 +187,9 @@ static void init_opencl() {
   context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
   check_status("clCreateContext", err);
   
-  // Create a command queue on this device, since we want to use if for
+  // Create a command queue on this device, since we want to use it for
   // running our CL program.
-  queue = clCreateCommandQueue(context, device, 0, &err);
+  queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
   check_status("clCreateCommandQueue", err);
 }
 
