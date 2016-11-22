@@ -3,3 +3,4 @@ opencl_add/*.swp
 *.o
 *.out
 *.swo
+*.swp
