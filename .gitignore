@@ -1,6 +1,8 @@
+.DS_Store
 opencl_add/*.swp
 *.bc
 *.o
 *.out
 *.swo
 *.swp
+*.zip
