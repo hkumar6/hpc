@@ -1,3 +1,8 @@
+/* 
+ * written by Alexander Pöppl (poeppl@in.tum.de)
+ * for the high performance computing course at TUM
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
