@@ -6,3 +6,5 @@ opencl_add/*.swp
 *.swo
 *.swp
 *.zip
+*.tar.gz
+*.mtx
